@@ -1,0 +1,52 @@
+html, body {
+    height: 100%;
+}
+
+body {
+    min-width: 800px;
+    font-family: "IBM Plex Sans", serif;
+    background-color: #ebebeb;
+}
+
+.loginBody {
+    display: -ms-flexbox;
+    display: -webkit-box;
+    display: flex;
+    -ms-flex-align: center;
+    -ms-flex-pack: center;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+.form-signin {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: 0 auto;
+}
+
+.formButton,
+.form-control::placeholder,
+.form-signin-heading {
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.formButton,
+.form-control::placeholder {
+    font-size: smaller;
+}
+
+.form-control::placeholder {
+    color: #b2b2b2;
+}
+
+.mainAreaHeader {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+}
