@@ -11,19 +11,7 @@ $(document).ready(function () {
                 password: passwordField.val()
             };
             passwordField.val("");
-
-            ajaxDoLogin(credentials, function (response) {
-                console.log("===== ajaxDoLogin (success) =====");
-                console.log("response=" + JSON.stringify(response));
-                loginForm.find("input[name='token']").val(response.token);
-                loginForm.off("submit");
-
-                getPrincipal(response, function (resp) {
-                    console.log(resp);
-                });
-
-                // loginForm.submit();
-            });
+            ajaxDoLogin(credentials, onLoginSuccess);
         })
     );
 });
@@ -48,11 +36,26 @@ function ajaxDoLogin(credentials, onSuccess) {
     });
 }
 
-function getPrincipal(credentials, onSuccess) {
-    let url = getUrl("/api/user/") + credentials.username;
+function onLoginSuccess(jwtToken) {
+    console.log("===== onLoginSuccess =====");
+    console.log("jwtToken=" + JSON.stringify(jwtToken));
+    let loginForm = $(".form-signin");
+    loginForm.find("input[name='jwtToken']").val(JSON.stringify(jwtToken.token));
+
+    getPrincipal(jwtToken, function (resp) {
+        console.log("===== getPrincipal (success) =====");
+        console.log(resp);
+        loginForm.find("input[name='userDto']").val(JSON.stringify(resp));
+        loginForm.off("submit");
+        // loginForm.submit();
+    });
+}
+
+function getPrincipal(jwtToken, onSuccess) {
+    let url = getUrl("/api/user/") + jwtToken.username;
     console.log("===== getPrincipal =====");
     console.log("url=" + url);
-    console.log("credentials=" + JSON.stringify(credentials));
+    console.log("jwtToken=" + JSON.stringify(jwtToken));
     $.ajax({
         type: "GET",
         // contentType: "application/json",
@@ -60,7 +63,7 @@ function getPrincipal(credentials, onSuccess) {
         // dataType: 'json',
         success: onSuccess,
         headers: {
-            "Authorization" : "Bearer " + credentials.token
+            "Authorization": "Bearer " + jwtToken.token
         },
         error: function (jqXHR) {
             console.log("===== getPrincipal (error) =====");
