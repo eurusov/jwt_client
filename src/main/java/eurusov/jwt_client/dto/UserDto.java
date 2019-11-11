@@ -16,6 +16,7 @@ public class UserDto {
     @EqualsAndHashCode.Include
     private String username;
 
+    @ToString.Exclude
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 

@@ -1,7 +1,7 @@
 import {getUrl} from "/js/func.js";
 
 $(document).ready(function () {
-    // register the function that intercepts a 'login' form submit event
+    // Registers a function that intercepts submit event of the login form.
     let loginForm = $(".form-signin");
     loginForm.on("submit", (function (event) {
             event.preventDefault();
@@ -22,7 +22,7 @@ function ajaxDoLogin(credentials, onSuccess) {
     console.log("url=" + url);
     console.log("credentials=" + JSON.stringify(credentials));
     $.ajax({
-        type: "POST",
+        method: "POST",
         contentType: "application/json",
         url: url,
         data: JSON.stringify(credentials),
@@ -39,15 +39,17 @@ function ajaxDoLogin(credentials, onSuccess) {
 function onLoginSuccess(jwtToken) {
     console.log("===== onLoginSuccess =====");
     console.log("jwtToken=" + JSON.stringify(jwtToken));
-    let loginForm = $(".form-signin");
-    loginForm.find("input[name='jwtToken']").val(JSON.stringify(jwtToken.token));
+    sessionStorage['jwtToken'] = JSON.stringify(jwtToken);
 
     getPrincipal(jwtToken, function (resp) {
         console.log("===== getPrincipal (success) =====");
         console.log(resp);
-        loginForm.find("input[name='userDto']").val(JSON.stringify(resp));
-        loginForm.off("submit");
-        // loginForm.submit();
+
+        ajaxGetUserPath(resp, function (path) {
+            console.log(window.origin);
+            console.log(path);
+            window.location.assign(window.origin + path);
+        })
     });
 }
 
@@ -57,10 +59,7 @@ function getPrincipal(jwtToken, onSuccess) {
     console.log("url=" + url);
     console.log("jwtToken=" + JSON.stringify(jwtToken));
     $.ajax({
-        type: "GET",
-        // contentType: "application/json",
         url: url,
-        // dataType: 'json',
         success: onSuccess,
         headers: {
             "Authorization": "Bearer " + jwtToken.token
@@ -75,4 +74,15 @@ function getPrincipal(jwtToken, onSuccess) {
             }
         }
     });
+}
+
+function ajaxGetUserPath(user, onSuccess) {
+    console.log(user);
+    jQuery.ajax({
+        method: "POST",
+        contentType: "application/json",
+        url: "/localApi/userPath",
+        data: JSON.stringify(user),
+        success: onSuccess,
+    })
 }

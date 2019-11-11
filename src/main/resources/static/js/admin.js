@@ -3,32 +3,27 @@ import {parseAuthToRoles} from "/js/func.js";
 import {roleFromAuthority} from "/js/func.js";
 import {getUrl} from "/js/func.js";
 
-// (function() {
-//     'use strict';
-//     window.addEventListener('load', function() {
-//         // Fetch all the forms we want to apply custom Bootstrap validation styles to
-//         let forms = document.getElementsByClassName('needs-validation');
-//         // Loop over them and prevent submission
-//         let validation = Array.prototype.filter.call(forms, function(form) {
-//             form.addEventListener('submit', function(event) {
-//                 if (form.checkValidity() === false) {
-//                     event.preventDefault();
-//                     event.stopPropagation();
-//                 }
-//                 form.classList.add('was-validated');
-//             }, false);
-//         });
-//     }, false);
-// })();
-
-
-$(document).ajaxError(function (event, resp, settings, thrownError) {
-    console.error("An error occurred while processing AJAX request!")
+// Register the handler to be called when Ajax requests complete with an error.
+$(document).ajaxError(function (event, resp) {
+    console.error("An error occurred while processing the AJAX request!");
     console.error(resp.responseText);
 });
 
+/*
+ Register the handler to be executed before an Ajax request is sent.
+ This function adds the 'Authorization' header with token to every cross-domain requests.
+*/
+$(document).ajaxSend(function (event, jqXHR, options) {
+    if (options.crossDomain) {
+        jqXHR.setRequestHeader("Authorization", "Bearer " + JSON.parse(sessionStorage['jwtToken']).token);
+    }
+});
+
 $(document).ready(function () {
-        // register the function that intercepts a 'new user' form submit event
+        console.log("===== admin.js (on document ready) =====");
+        console.log("sessionStorage['jwtToken']=" + sessionStorage['jwtToken']);
+
+        // Registers a function that intercepts submit event of the form 'new user'.
         $("#newUserForm").on("submit", function (event) {
             event.preventDefault();
             if (this.checkValidity() === true) {
@@ -37,7 +32,7 @@ $(document).ready(function () {
             this.classList.add("was-validated");
         });
 
-        // register the function that intercepts a 'edit user' form submit event
+        // Registers a function that intercepts submit event of the user editing form.
         $("#editUserForm").on("submit", function (event) {
             event.preventDefault();
             if (this.checkValidity() === true) {
@@ -46,42 +41,51 @@ $(document).ready(function () {
             this.classList.add("was-validated");
         });
 
+        $("#logoutLink").on("click", function (event) {
+            event.preventDefault();
+            sessionStorage['jwtToken'] = null;
+            window.location.assign(window.origin);
+        });
+
         ajaxGetAllUsersAndRedrawTable();
         ajaxGetAllAuthorities(completeCheckboxes);
-
-        $.ajax({
-            url: '/api/user',
-            success: fillPrincipalTable // function from func.js
-        });
+        ajaxGetUserByUsername(JSON.parse(sessionStorage['jwtToken']).username, fillPrincipalTable);
     }
 );
 
 function ajaxGetAllAuthorities(onSuccess) {
     $.ajax({
-        url: getUrl('/api/authorities'),
+        url: getUrl('/api/admin/authorities'),
         success: onSuccess
     });
 }
 
 function ajaxGetAllUsersAndRedrawTable() {
     $.ajax({
-        url: getUrl('/api/list'),
+        url: getUrl('/api/admin/list'),
         success: redrawTable
     });
 }
 
 function ajaxGetUserById(userId, onSuccess) {
     $.ajax({
-        url: getUrl('/api/user/' + userId),
+        url: getUrl('/api/admin/user/?id=' + userId),
+        success: onSuccess
+    });
+}
+
+function ajaxGetUserByUsername(username, onSuccess) {
+    $.ajax({
+        url: getUrl('/api/admin/user/?name=' + username),
         success: onSuccess
     });
 }
 
 function ajaxSaveNewUser(user, onSuccess) {
     $.ajax({
-        type: "POST",
+        method: "POST",
         contentType: "application/json",
-        url: getUrl("/api/add"),
+        url: getUrl("/api/admin/add"),
         data: JSON.stringify(user),
         dataType: 'json',
         success: onSuccess
@@ -90,9 +94,9 @@ function ajaxSaveNewUser(user, onSuccess) {
 
 function ajaxUpdateUser(user, onSuccess) {
     $.ajax({
-        type: "PUT",
+        method: "PUT",
+        url: getUrl("/api/admin/update"),
         contentType: "application/json",
-        url: getUrl("/api/update"),
         data: JSON.stringify(user),
         dataType: 'json',
         success: onSuccess
@@ -101,8 +105,8 @@ function ajaxUpdateUser(user, onSuccess) {
 
 function ajaxDeleteUser(userId, onSuccess) {
     $.ajax({
-        url: getUrl('/api/delete/' + userId),
         method: "DELETE",
+        url: getUrl('/api/admin/delete/' + userId),
         success: onSuccess
     });
 }

@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Spring Boot Application</title>
+    <link rel="icon" type="image/png" href="img/favicon.png"/>
 
     <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
@@ -35,10 +36,6 @@
         </div>
         <input type="password" th:placeholder="password"
                id="password" name="password" class="form-control"/> <br/>
-    </div>
-    <div hidden>
-        <input type="text" id="jwtToken" name="jwtToken" class="form-control"/>
-        <input type="text" id="userDto" name="userDto" class="form-control"/>
     </div>
     <button class="btn btn-lg btn-primary btn-block mb-5 formButton" name="Submit" value="Login" type="Submit"
             th:text="Login">
